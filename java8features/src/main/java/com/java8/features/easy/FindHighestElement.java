@@ -1,0 +1,14 @@
+package com.java8.features.easy;
+
+import java.util.Comparator;
+import java.util.List;
+
+public class FindHighestElement {
+    static void main() {
+        List<Integer> list = List.of(1, 2, 3, 4, 5, 6, 22, 3, 44, 5, 666, 22);
+        Integer max = list.stream().distinct().min(Comparator.reverseOrder()).get();
+        Integer secondHighest = list.stream().distinct().sorted(Comparator.reverseOrder()).skip(1).findFirst().get();
+        System.out.println(max);
+        System.out.println(secondHighest);
+    }
+}
