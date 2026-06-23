@@ -23,6 +23,8 @@ public class StringPrograms {
         StringPrograms.countTheWordsLengthIsGE5();
         StringPrograms.groupTheStringsWithLength();
         StringPrograms.sortListFfStringsAlphabetically();
+        StringPrograms.removeDuplicateStringsFromList();
+        StringPrograms.FindFirstStringThatStartsWith();
     }
 
     public static void countOccurrenceInString() {
@@ -80,6 +82,18 @@ public class StringPrograms {
         String string = "principle + charges = installment amount or else report and don't add customer installment";
         List<String> sorted = Arrays.stream(string.split(" ")).sorted().toList();
         System.out.println(sorted);
+    }
+
+    public static void removeDuplicateStringsFromList() {
+        String string = "principle + charges = installment amount or else report and don't add customer installment";
+        List<String> distinct = Arrays.stream(string.split(" ")).distinct().toList();
+        System.out.println(distinct);
+    }
+
+    public static void FindFirstStringThatStartsWith() {
+        String string = "principle + charges = installment amount or else report and don't add customer installments";
+        String s= Arrays.stream(string.split(" ")).filter(word -> word.startsWith("i")).findFirst().get();
+        System.out.println(s);
     }
 
 }
