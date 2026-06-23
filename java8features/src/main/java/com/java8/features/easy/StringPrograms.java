@@ -22,6 +22,7 @@ public class StringPrograms {
         StringPrograms.findRepeatedWordCountInList();
         StringPrograms.countTheWordsLengthIsGE5();
         StringPrograms.groupTheStringsWithLength();
+        StringPrograms.sortListFfStringsAlphabetically();
     }
 
     public static void countOccurrenceInString() {
@@ -74,4 +75,11 @@ public class StringPrograms {
         Map<Integer, List<String>> collect = Arrays.stream(string.split(" ")).collect(Collectors.groupingBy(String::length));
         System.out.println(collect);
     }
+
+    public static void sortListFfStringsAlphabetically() {
+        String string = "principle + charges = installment amount or else report and don't add customer installment";
+        List<String> sorted = Arrays.stream(string.split(" ")).sorted().toList();
+        System.out.println(sorted);
+    }
+
 }
