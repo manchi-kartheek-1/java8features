@@ -26,5 +26,15 @@ public class StringPrograms {
                 .map(String::valueOf)
                 .collect(Collectors.joining());
         System.out.println(string);
+        StringPrograms.convertToLowerCase(string);
+
+    }
+
+    public static void convertToLowerCase(String s) {
+        String collect = s.chars()
+                .mapToObj(c -> (char) Character.toLowerCase(c))
+                .map(String::valueOf)
+                .collect(Collectors.joining());
+        System.out.println(collect);
     }
 }
