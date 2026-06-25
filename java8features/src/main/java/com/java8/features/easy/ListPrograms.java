@@ -22,7 +22,7 @@ public class ListPrograms {
 
     public static void minNumber() {
 
-        Integer min = list.stream().distinct().min(Comparator.naturalOrder()).get();
+        Integer min = list.stream().distinct().sorted().findFirst().get();
         Integer secondMin = list.stream().distinct().sorted().skip(1).findFirst().get();
         System.out.println(min);
         System.out.println(secondMin);
