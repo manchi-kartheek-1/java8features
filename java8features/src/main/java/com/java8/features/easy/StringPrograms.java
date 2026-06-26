@@ -127,7 +127,7 @@ public class StringPrograms {
 
     public static void filterAllStringsAreNonEmpty() {
         List<String> list = List.of("principle", "charges", "installment", "", " ", "else", "report", "and", "don't", "add", "customer");
-        List<String> collect = list.stream().filter(word -> word.isEmpty() && word.isBlank()).collect(Collectors.toList());
+        List<String> collect = list.stream().filter(f -> !f.isEmpty() && !f.isBlank()).collect(Collectors.toList());
         System.out.println(collect);
     }
 
