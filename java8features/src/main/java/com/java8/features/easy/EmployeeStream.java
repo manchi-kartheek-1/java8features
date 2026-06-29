@@ -101,14 +101,19 @@ public class EmployeeStream {
     }
 
     public void findSecondHighestSal(List<Employee> employeeList) {
-        Employee employee = employeeList.stream().sorted(Comparator.comparingDouble(Employee::getSalary).reversed())
+        Employee employee = employeeList
+                .stream()
+                .sorted(Comparator.comparingDouble(Employee::getSalary).reversed())
                 .skip(1)
-                .findFirst().get();
+                .findFirst()
+                .get();
         System.out.println(employee);
     }
 
     public void findTop_3_Highest_Salary_Emp(List<Employee> employeeList) {
-        List<Employee> list = employeeList.stream().sorted(Comparator.comparingDouble(Employee::getSalary).reversed())
+        List<Employee> list = employeeList
+                .stream()
+                .sorted(Comparator.comparingDouble(Employee::getSalary).reversed())
                 .limit(3)
                 .toList();
         System.out.println(list);
