@@ -15,7 +15,7 @@ public class TwoSum {
         System.out.println(" " + Arrays.toString(indexByHashing));
     }
 
-    //Bruteforce Solution O(n2)
+    //Bruteforce Solution TC O(n2) SC O(1)
     public static int[] getByBruteForce(int[] a, int target) {
         for (int i = 0; i < a.length; i++) {
             for (int j = 0; j < a.length; j++) {
@@ -30,12 +30,13 @@ public class TwoSum {
         return new int[]{0, 0};
     }
 
-    //By Hashing Technique O(n)
+    //By Hashing Technique TC O(n) SC O(n)
     public static int[] getByHashing(int[] a, int target) {
         Map<Integer, Integer> map = new HashMap<>();
         for (int i = 0; i < a.length; i++) {
             int complement = target - a[i];
             if (map.containsKey(complement)) {
+                System.out.println(map);
                 return new int[]{map.get(complement), i};
             }
             map.put(a[i], i);
