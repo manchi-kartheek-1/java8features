@@ -1,9 +1,11 @@
 package com.java8.features.easy;
 
+import com.java8.features.FunInterface;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Slf4j
 public class StringPrograms {
@@ -25,6 +27,13 @@ public class StringPrograms {
         StringPrograms.findShortestStringInList();
         StringPrograms.filterStringsHavingLengthExactly();
         StringPrograms.filterAllStringsAreNonEmpty();
+        FunInterface obj = () -> {
+            System.out.println("Inside test()");
+        };
+
+        obj.test();
+        FunInterface.test1();
+        FunInterface.test2();
     }
 
     public static void countOccurrenceInString() {
@@ -131,4 +140,14 @@ public class StringPrograms {
         System.out.println(collect);
     }
 
+    public static void reverseString(){
+        String str = "String";
+        String collect = IntStream.range(0, str.length())
+                .mapToObj(i -> str.charAt(str.length() - 1 - i))
+                .map(String::valueOf)
+                .collect(Collectors.joining());
+
+
+        System.out.println(collect);
+    }
 }
