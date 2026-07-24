@@ -1,0 +1,225 @@
+🟢 Level 1: Array Basics (Must Learn First)
+
+These teach traversal, indexing, and simple operations.
+
+Find the maximum element
+Find the minimum element
+Find the second largest element
+Find the second smallest element
+Check if an array is sorted
+Reverse an array
+Copy one array into another
+Count even and odd numbers
+Find the sum of all elements
+Find the average of array elements
+Count positive, negative, and zero elements
+Rotate array left by one
+Rotate array right by one
+
+Concepts: Loops, indexing, variables
+
+🟡 Level 2: Searching
+Linear Search
+Binary Search
+First occurrence of an element
+Last occurrence of an element
+Count occurrences of a target
+Search in a rotated sorted array
+Find floor and ceil in a sorted array
+
+Concepts: Binary search, sorted arrays
+
+🟠 Level 3: Sorting (Know the Algorithms)
+
+Implement:
+
+Bubble Sort
+Selection Sort
+Insertion Sort
+Merge Sort
+Quick Sort
+
+Know their:
+
+Time Complexity
+Space Complexity
+Stability
+Best/Worst/Average cases
+🔵 Level 4: Two Pointers (Very Important)
+Remove duplicates from sorted array
+Move all zeros to the end
+Move all negative numbers to one side
+Two Sum (sorted array)
+Pair with a given sum
+Merge two sorted arrays
+Reverse only vowels
+Squares of a sorted array
+Container With Most Water
+Trapping Rain Water
+
+Pattern: Two pointers moving toward each other or in the same direction.
+
+🟣 Level 5: Sliding Window (Most Asked)
+Fixed Window
+Maximum sum subarray of size k
+First negative number in every window
+Maximum average subarray
+Count distinct elements in every window
+Variable Window
+Longest substring without repeating characters
+Longest subarray with sum ≤ K
+Minimum size subarray sum
+Longest repeating character replacement
+Fruits Into Baskets
+
+Pattern: Expand and shrink a window.
+
+🔴 Level 6: Prefix Sum
+Prefix sum array
+Range Sum Query
+Subarray Sum Equals K
+Count subarrays with given sum
+Continuous Subarray Sum
+Product of array except self
+
+Pattern: Precompute cumulative sums.
+
+🟤 Level 7: Kadane's Algorithm
+Maximum subarray sum
+Maximum circular subarray sum
+Print maximum subarray
+Maximum product subarray
+
+Pattern: Track the best running result.
+
+⚫ Level 8: Hashing
+Two Sum
+Contains Duplicate
+Majority Element
+Longest Consecutive Sequence
+Top K Frequent Elements
+Find Duplicate Number
+Missing Number
+Intersection of two arrays
+
+Pattern: Use HashMap or HashSet for fast lookups.
+
+🟢 Level 9: Matrix Problems
+Transpose Matrix
+Rotate Matrix by 90°
+Spiral Matrix
+Set Matrix Zeroes
+Search in a 2D Matrix
+Diagonal Traversal
+Sudoku Validator
+
+Pattern: Row/column traversal.
+
+🟠 Level 10: Binary Search on Answer
+Koko Eating Bananas
+Capacity to Ship Packages Within D Days
+Split Array Largest Sum
+Aggressive Cows
+Allocate Minimum Number of Pages
+Painter's Partition Problem
+
+Pattern: Binary search over the answer space.
+
+🔵 Level 11: Greedy + Arrays
+Jump Game
+Jump Game II
+Gas Station
+Candy
+Merge Intervals
+Insert Interval
+Non-overlapping Intervals
+🟣 Level 12: Advanced Array Problems
+Next Permutation
+Dutch National Flag (Sort Colors)
+Merge Intervals
+3Sum
+4Sum
+Maximum Gap
+Find Missing and Repeating Number
+Count Inversions
+Median of Two Sorted Arrays
+Smallest Missing Positive
+⭐ Top 25 Array Interview Questions
+
+If you have limited time, prioritize these:
+
+Two Sum
+Best Time to Buy and Sell Stock
+Maximum Subarray (Kadane's Algorithm)
+Move Zeroes
+Remove Duplicates from Sorted Array
+Merge Sorted Array
+Rotate Array
+Product of Array Except Self
+Contains Duplicate
+Majority Element
+Missing Number
+Find Duplicate Number
+Search in Rotated Sorted Array
+Container With Most Water
+Trapping Rain Water
+3Sum
+Next Permutation
+Merge Intervals
+Set Matrix Zeroes
+Spiral Matrix
+Search a 2D Matrix
+Sort Colors
+Longest Consecutive Sequence
+Subarray Sum Equals K
+Maximum Product Subarray
+Recommended Learning Order
+Arrays Basics
+      ↓
+Searching
+      ↓
+Sorting
+      ↓
+Two Pointers
+      ↓
+Sliding Window
+      ↓
+Prefix Sum
+      ↓
+Hashing
+      ↓
+Kadane's Algorithm
+      ↓
+Matrix Problems
+      ↓
+Binary Search on Answer
+      ↓
+Greedy Arrays
+      ↓
+Advanced Array Problems
+If You're Targeting Product-Based Companies
+
+A strong array foundation should include:
+
+✅ Array traversal
+✅ Searching
+✅ Sorting
+✅ Two pointers
+✅ Sliding window
+✅ Prefix sum
+✅ Hashing
+✅ Kadane's algorithm
+✅ Matrix operations
+✅ Binary search
+✅ Greedy techniques
+
+Mastering these patterns will prepare you for the majority of array questions asked in interviews at companies like Amazon, Microsoft, Google, Adobe, Atlassian, Walmart Global Tech, and many others.
+
+Tip: For each problem you solve, don't just memorize the code. Ask yourself:
+
+What pattern does this use?
+What's the time complexity?
+What's the space complexity?
+Can I solve it in a more optimal way?
+
+Recognizing patterns is what makes new interview problems much easier to solve.
