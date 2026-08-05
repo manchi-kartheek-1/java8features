@@ -1,0 +1,567 @@
+Java Memory Management & Garbage Collection — Interview Questions
+🟢 Level 1 — Beginner
+1. What is memory management in Java?
+2. Why does Java need memory management?
+3. How does Java manage memory automatically?
+4. What is JVM memory?
+5. What are the major memory areas in JVM?
+6. What is Heap memory?
+7. What is Stack memory?
+8. What is Method Area?
+9. What is Metaspace?
+10. What is PC Register?
+11. What is Native Method Stack?
+12. What is the difference between Heap and Stack?
+13. Where are objects stored in Java?
+14. Where are local variables stored?
+15. Where are static variables stored?
+16. Where are instance variables stored?
+17. Where are String objects stored?
+18. What is the difference between StackOverflowError and OutOfMemoryError?
+19. What is java.lang.OutOfMemoryError?
+20. What is StackOverflowError?
+🟡 Level 2 — Heap Memory
+21. What is Heap memory?
+22. Why are Java objects stored in Heap?
+23. Is Heap memory shared between threads?
+24. Is Stack memory shared between threads?
+25. What happens when you create an object using new?
+
+Example:
+
+Employee emp = new Employee();
+
+Explain what happens internally.
+
+26. What happens when you create 1 million objects?
+27. What happens when Heap memory becomes full?
+28. Can Heap size grow dynamically?
+29. What are -Xms and -Xmx?
+30. How do you configure JVM Heap size?
+
+Example:
+
+java -Xms512m -Xmx2g Application
+31. What happens if -Xmx is reached?
+32. Can we manually free Heap memory?
+33. Can we force Garbage Collection?
+34. What is the difference between:
+System.gc();
+
+and
+
+Runtime.getRuntime().gc();
+🟠 Level 3 — Stack Memory
+35. What is Stack memory?
+36. Why does each thread have its own Stack?
+37. What is a Stack Frame?
+38. What does a Stack Frame contain?
+39. What happens when a method is called?
+40. What happens when a method returns?
+41. How are local variables stored?
+42. What happens during recursive calls?
+43. Why does infinite recursion cause StackOverflowError?
+
+Example:
+
+public void test() {
+    test();
+}
+44. Can Stack size be configured?
+45. What is -Xss?
+
+Example:
+
+-Xss1m
+🔵 Level 4 — Object Memory
+46. Explain the memory flow of this code:
+Employee e = new Employee();
+47. What is a reference variable?
+48. What is the difference between an object and a reference?
+49. Can multiple references point to the same object?
+Employee e1 = new Employee();
+Employee e2 = e1;
+50. What happens when you do:
+e1 = null;
+51. Is the object immediately destroyed when the reference becomes null?
+52. What makes an object eligible for Garbage Collection?
+53. What is an unreachable object?
+54. What is a strongly reachable object?
+55. What is an island of isolation?
+🟣 Level 5 — Garbage Collection Basics
+56. What is Garbage Collection?
+57. Why do we need Garbage Collection?
+58. Who performs Garbage Collection?
+59. Is Garbage Collection performed by JVM or JDK?
+60. Can developers control Garbage Collection directly?
+61. Can we guarantee when GC will execute?
+62. Can we force Garbage Collection?
+63. What is a GC pause?
+64. What is Stop-The-World?
+65. Does GC stop all application threads?
+66. What happens during a GC cycle?
+67. How does JVM identify garbage?
+68. How does JVM determine whether an object is still alive?
+🔥 Level 6 — Garbage Collection Algorithms
+69. What is Mark and Sweep?
+70. Explain Mark and Sweep with an example.
+71. What is Mark and Compact?
+72. What is Copying Garbage Collection?
+73. What is Generational Garbage Collection?
+74. Why is Java GC generational?
+75. What is the Weak Generational Hypothesis?
+76. What is fragmentation?
+77. What is memory compaction?
+78. What is the difference between Mark-Sweep and Mark-Compact?
+79. What is the difference between Copying and Mark-Compact?
+🚀 Level 7 — Young Generation & Old Generation
+80. What is Young Generation?
+81. What is Old Generation?
+82. What is Eden Space?
+83. What are Survivor Spaces?
+84. What are S0 and S1?
+85. What is Minor GC?
+86. What is Major GC?
+87. What is Full GC?
+88. What happens during Minor GC?
+89. What happens during Full GC?
+90. Why is Minor GC usually faster?
+91. Why do objects move between generations?
+92. What is object promotion?
+93. When does an object move from Young to Old Generation?
+94. What is object age?
+95. What happens when Survivor Space becomes full?
+96. What is premature promotion?
+97. What is promotion failure?
+🧠 Level 8 — Garbage Collection Flow
+
+This is very important for interviews.
+
+98. Explain the complete lifecycle of a Java object.
+
+You should be able to explain:
+
+new Object()
+     ↓
+Eden
+     ↓
+Minor GC
+     ↓
+Survivor S0
+     ↓
+Minor GC
+     ↓
+Survivor S1
+     ↓
+Repeated GC
+     ↓
+Old Generation
+     ↓
+Major/Full GC
+     ↓
+Object removed
+99. Explain the complete lifecycle of an object from creation to destruction.
+100. What happens when Eden becomes full?
+101. What happens during Minor GC?
+102. What happens to live objects during Minor GC?
+103. Why do we have two Survivor Spaces?
+104. Why does an object move between S0 and S1?
+105. What happens if an object survives multiple Minor GCs?
+106. How does JVM decide when to promote an object?
+107. What happens after an object reaches Old Generation?
+🔴 Level 9 — GC Roots
+108. What is a GC Root?
+109. Why are GC Roots important?
+110. What are the different types of GC Roots?
+111. Are local variables GC Roots?
+112. Are static variables GC Roots?
+113. Are active threads GC Roots?
+114. Explain reachability using GC Roots.
+
+Example:
+
+GC Root
+   |
+   ↓
+Object A
+   |
+   ↓
+Object B
+
+If Object A is reachable, Object B can also be reachable.
+
+115. What happens if no GC Root can reach an object?
+116. Can circular references cause memory leaks?
+
+Example:
+
+A → B
+↑   ↓
+└───┘
+💀 Level 10 — Memory Leaks
+117. What is a Memory Leak in Java?
+118. If Java has Garbage Collection, how can memory leaks happen?
+119. What causes memory leaks in Java?
+120. How can static collections cause memory leaks?
+
+Example:
+
+static List<Employee> employees = new ArrayList<>();
+121. How can listeners cause memory leaks?
+122. How can ThreadLocal cause memory leaks?
+123. How can caches cause memory leaks?
+124. How can unclosed resources cause memory problems?
+125. How do you identify a memory leak?
+126. How do you troubleshoot an OutOfMemoryError in production?
+⚡ Level 11 — Garbage Collectors
+
+You should know the major collectors.
+
+127. What are different Garbage Collectors available in modern Java?
+128. What is Serial GC?
+129. What is Parallel GC?
+130. What is G1 Garbage Collector?
+131. What is ZGC?
+132. What is Shenandoah GC?
+133. What is the difference between Serial and Parallel GC?
+134. What is the difference between Parallel GC and G1 GC?
+135. What is the difference between G1 and ZGC?
+136. When would you choose G1 GC?
+137. When would you choose ZGC?
+138. What is low-latency Garbage Collection?
+139. What is throughput-oriented Garbage Collection?
+🔥 Level 12 — G1 Garbage Collector
+
+Very important for modern Java interviews.
+
+140. What is G1 Garbage Collector?
+141. Why was G1 introduced?
+142. How is G1 different from traditional generational GC?
+143. What is a G1 Region?
+144. Does G1 divide Heap into Young/Old physically?
+145. What is a Humongous Object in G1?
+146. What is G1 Young GC?
+147. What is G1 Mixed GC?
+148. What is a Mixed Collection?
+149. What is G1's remembered set?
+150. What is the purpose of a write barrier?
+151. How does G1 select regions for collection?
+152. What is the G1 pause-time goal?
+153. What does this mean?
+-XX:MaxGCPauseMillis=200
+154. What happens if G1 cannot meet the pause-time target?
+155. Why is G1 commonly used for large heaps?
+🧨 Level 13 — ZGC
+156. What is ZGC?
+157. Why was ZGC introduced?
+158. What problem does ZGC solve?
+159. What is the main advantage of ZGC?
+160. How does ZGC achieve low pause times?
+161. What are colored pointers?
+162. What is concurrent GC?
+163. How is ZGC different from G1?
+164. When should you use ZGC?
+165. What are the trade-offs of ZGC?
+🧵 Level 14 — GC + Multithreading
+166. Is Heap shared between threads?
+167. Is Stack shared between threads?
+168. Can multiple threads create objects in Heap simultaneously?
+169. How does JVM handle concurrent object allocation?
+170. What is TLAB?
+171. What is Thread Local Allocation Buffer?
+172. Why is TLAB useful?
+173. Can GC happen while multiple threads are executing?
+174. What is Stop-The-World in a multithreaded application?
+🏦 Level 15 — Production-Level Questions
+
+These are especially important if you're interviewing for Senior Java / Production Support / Banking applications.
+
+175. Your production application throws:
+java.lang.OutOfMemoryError: Java heap space
+
+How will you troubleshoot it?
+
+176. Application is running very slowly. How will you determine whether GC is the reason?
+177. CPU usage is suddenly 100%. How can GC cause this?
+178. Application has frequent Full GC. What could be the reason?
+179. Heap usage continuously increases. What would you check?
+180. Heap usage increases and never comes down. What does this indicate?
+181. Heap is 90% full, but application is still running. Is that necessarily a problem?
+182. How would you analyze a Java Heap Dump?
+183. What tools can be used to analyze Heap Dumps?
+184. What is a GC log?
+185. How do you enable GC logging?
+186. What information can you obtain from GC logs?
+187. How do you identify long GC pauses?
+188. How do you identify memory leaks from GC logs?
+189. What is GC overhead?
+190. What is:
+java.lang.OutOfMemoryError: GC overhead limit exceeded
+191. What is native memory?
+192. Can an application run out of memory even when Heap has free space?
+193. What is DirectByteBuffer?
+194. What is off-heap memory?
+195. What is Metaspace OutOfMemoryError?
+💻 Level 16 — JVM Memory Configuration
+196. What does -Xms mean?
+197. What does -Xmx mean?
+198. What does -Xss mean?
+199. What does -XX:MetaspaceSize mean?
+200. What does -XX:MaxMetaspaceSize mean?
+201. What does -XX:+UseG1GC mean?
+202. What does -XX:+UseZGC mean?
+203. What does -XX:+HeapDumpOnOutOfMemoryError do?
+204. What does -XX:HeapDumpPath do?
+205. How would you configure JVM for a production Spring Boot application?
+
+Example:
+
+-Xms2g
+-Xmx4g
+-XX:+UseG1GC
+-XX:MaxGCPauseMillis=200
+-XX:+HeapDumpOnOutOfMemoryError
+🧩 Level 17 — Java String & Memory
+206. Where are Strings stored?
+207. What is String Pool?
+208. What is String Interning?
+209. Difference between:
+String a = "Hello";
+
+and
+
+String b = new String("Hello");
+210. How many objects are created?
+String s = new String("Hello");
+211. What happens to String literals?
+212. Can Strings cause OutOfMemoryError?
+213. What is String.intern()?
+214. Why is String immutable?
+215. How does String immutability help memory management?
+🧠 Level 18 — Advanced JVM Questions
+216. What is Escape Analysis?
+217. What is Scalar Replacement?
+218. Can an object theoretically avoid Heap allocation?
+219. What is Stack Allocation?
+220. What is JIT Compiler?
+221. How does JIT affect memory management?
+222. What is compressed OOPs?
+223. What are compressed class pointers?
+224. What is object header?
+225. What is object alignment?
+226. Why does an object consume more memory than its fields alone?
+227. What is TLAB allocation?
+228. What is native memory?
+229. Heap vs Metaspace vs Native Memory?
+230. What is class unloading?
+🧪 Level 19 — Scenario-Based Questions
+
+These are very important for senior interviews.
+
+Scenario 1
+
+Your application has:
+
+-Xmx4GB
+
+but Heap usage reaches 3.9 GB.
+
+What happens next?
+
+Scenario 2
+
+Your application is doing:
+
+while(true) {
+    list.add(new Employee());
+}
+
+What happens?
+
+Scenario 3
+
+You have:
+
+List<Employee> list = new ArrayList<>();
+
+while(true) {
+    list.add(new Employee());
+}
+
+Why can this cause OOM?
+
+Scenario 4
+
+You have:
+
+Employee employee = new Employee();
+employee = null;
+
+Is employee immediately removed from memory?
+
+Scenario 5
+
+Two objects reference each other:
+
+A a = new A();
+B b = new B();
+
+a.b = b;
+b.a = a;
+
+a = null;
+b = null;
+
+Will GC collect them?
+
+Why?
+
+Scenario 6
+
+Your application has frequent:
+
+Full GC
+Full GC
+Full GC
+
+What would you investigate?
+
+Scenario 7
+
+Application response time suddenly increases from:
+
+100ms → 5 seconds
+
+How would you determine whether GC is responsible?
+
+Scenario 8
+
+Your application throws:
+
+OutOfMemoryError: Java heap space
+
+Give the production troubleshooting steps from beginning to end.
+
+Scenario 9
+
+Your Heap is only 50% used but the application throws:
+
+OutOfMemoryError
+
+How is this possible?
+
+Scenario 10
+
+You increase:
+
+-Xmx4g → -Xmx16g
+
+Will the application necessarily become faster?
+
+Why/why not?
+
+🏆 Level 20 — "Hero" Interview Questions
+
+These are the questions I would definitely prepare for a Senior Java interview:
+
+Explain JVM memory architecture.
+Explain Heap vs Stack.
+Explain complete object lifecycle.
+Explain Young Generation.
+Explain Eden and Survivor Spaces.
+Explain Old Generation.
+Explain Minor GC vs Major GC vs Full GC.
+Explain Mark-Sweep.
+Explain Mark-Compact.
+Explain Generational GC.
+Explain GC Roots.
+Explain object reachability.
+Explain memory leaks in Java.
+Explain OutOfMemoryError.
+Explain StackOverflowError.
+Explain GC overhead limit exceeded.
+Explain G1 GC.
+Explain G1 Region.
+Explain G1 Mixed GC.
+Explain ZGC.
+G1 vs ZGC.
+Explain Stop-The-World.
+Explain concurrent vs STW GC.
+Explain TLAB.
+Explain Escape Analysis.
+Explain Metaspace.
+Explain Native Memory.
+Explain String Pool.
+How do you troubleshoot production OOM?
+How do you analyze a Heap Dump?
+How do you analyze GC logs?
+How do you identify a memory leak?
+How do you reduce Full GC?
+How do you tune JVM memory?
+How would you troubleshoot high CPU caused by GC?
+🎯 Recommended Learning Order
+
+Don't try to memorize all 230 questions at once. Learn them in this order:
+
+                    JAVA MEMORY
+                         │
+             ┌───────────┴───────────┐
+             ↓                       ↓
+           STACK                    HEAP
+             │                       │
+       Stack Frame             Young Generation
+       Local Variables              │
+       Method Calls            ┌─────┴─────┐
+             │                 ↓           ↓
+       StackOverflow         Eden       Survivor
+                                       S0 / S1
+                                           │
+                                           ↓
+                                    Old Generation
+                                           │
+                                           ↓
+                                      GC / Cleanup
+                                           │
+                         ┌─────────────────┼─────────────────┐
+                         ↓                 ↓                 ↓
+                       Serial           Parallel            G1
+                                                               │
+                                                               ↓
+                                                              ZGC
+
+Then move to:
+
+JVM Memory
+    ↓
+Heap & Stack
+    ↓
+Object Lifecycle
+    ↓
+GC Roots
+    ↓
+Reachability
+    ↓
+Generational GC
+    ↓
+Minor / Major / Full GC
+    ↓
+GC Algorithms
+    ↓
+G1 GC
+    ↓
+ZGC
+    ↓
+Memory Leaks
+    ↓
+OOM
+    ↓
+Heap Dump
+    ↓
+GC Logs
+    ↓
+Production Troubleshooting
+    ↓
+JVM Tuning
+⭐ Most important for your interviews
+
+If you have limited preparation time, prioritize #5, #12, #18, #25, #52, #68, #73–95, #108–125, #130–165, and #175–205.
