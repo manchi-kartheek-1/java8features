@@ -140,7 +140,7 @@ public class StringPrograms {
         System.out.println(collect);
     }
 
-    public static void reverseString(){
+    public static void reverseString() {
         String str = "String";
         String collect = IntStream.range(0, str.length())
                 .mapToObj(i -> str.charAt(str.length() - 1 - i))
@@ -149,5 +149,22 @@ public class StringPrograms {
 
 
         System.out.println(collect);
+    }
+
+    public static void reverseStringWhile() {
+        String s1 = "TEST " + "JAVA";
+        char[] charArray = s1.toCharArray();
+        int l = 0;
+        int r = charArray.length - 1;
+        while (l < r) {
+            System.out.println(l + " " + r);
+            char temp = charArray[l];
+            charArray[l] = charArray[r];
+            charArray[r] = temp;
+            l++;
+            r--;
+        }
+        String s = new String(charArray);
+        System.out.println(s);
     }
 }
