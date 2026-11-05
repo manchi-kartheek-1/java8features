@@ -1,0 +1,47 @@
+Level 1 – Basic logic
+
+Count 1s in an array
+Find maximum/minimum
+Sum of array
+Reverse an array
+Count even/odd numbers
+Find positive/negative numbers
+Find prime numbers
+Factorial
+Fibonacci
+Palindrome number
+
+Level 2 – String logic
+
+Reverse String
+Palindrome String
+Count characters
+Count vowels
+Find duplicate characters
+First non-repeated character
+Remove duplicate characters
+Character frequency
+
+Level 3 – Arrays
+
+Find duplicates
+Remove duplicates
+Second largest
+Second smallest
+Missing number
+Find common elements
+Sort array
+Merge arrays
+Move zeros to end
+Find frequency of each number
+
+Level 4 – Collections
+
+HashMap frequency problems
+HashSet duplicate problems
+ArrayList manipulation
+Sorting objects
+Grouping
+Comparable / Comparator
+
+Then convert these problems to Streams

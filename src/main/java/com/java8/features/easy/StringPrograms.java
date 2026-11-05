@@ -4,6 +4,7 @@ import com.java8.features.FunInterface;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -17,6 +18,7 @@ public class StringPrograms {
         StringPrograms.convertingToUpperCase();
         StringPrograms.findStringStartsWithChar();
         StringPrograms.findRepeatedWordCountInList();
+        StringPrograms.findNonRepeatedWordCountInList();
         StringPrograms.countTheWordsLengthIsGE5();
         StringPrograms.groupTheStringsWithLength();
         StringPrograms.sortListFfStringsAlphabetically();
@@ -73,6 +75,24 @@ public class StringPrograms {
         String[] split = string.split(" ");
         Map<String, Long> collect = Arrays.stream(split).collect(Collectors.groupingBy(word -> word, Collectors.counting()));
         System.out.println(collect);
+    }
+
+    public static void findNonRepeatedWordCountInList() {
+        String string = "ManchiKartheek";
+        Character c1 = string.chars()
+                .mapToObj(c -> (char) c)
+                .collect(Collectors.groupingBy(
+                        Function.identity(),
+                        LinkedHashMap::new,
+                        Collectors.counting()))
+                .entrySet()
+                .stream()
+                .filter(entry -> entry.getValue() == 1)
+                .map(entry -> entry.getKey())
+                .findFirst()
+                .orElse(null);
+        System.out.println("Non Repeating Character "+c1);
+
     }
 
     public static void countTheWordsLengthIsGE5() {
