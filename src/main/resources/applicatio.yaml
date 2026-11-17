@@ -1,0 +1,344 @@
+spring:
+  application:
+    name: order-service
+  lifecycle:
+    timeout-per-shutdown-phase: 25s          # graceful shutdown window (< k8s terminationGracePeriodSeconds)
+
+  # ------------------------------------------------------------------
+  # Kafka: used for Dead Letter Queue, deferred work and async fallback
+  # ------------------------------------------------------------------
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      acks: all                              # wait for all in-sync replicas (durability)
+      retries: 2147483647                    # producer-level retries (bounded by delivery.timeout.ms)
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        enable.idempotence: true             # no duplicates on producer retry
+        max.in.flight.requests.per.connection: 5
+        delivery.timeout.ms: 120000
+        request.timeout.ms: 30000
+        linger.ms: 5
+    consumer:
+      group-id: order-service
+      auto-offset-reset: earliest
+      enable-auto-commit: false              # container commits after successful processing
+      max-poll-records: 50
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      # ErrorHandlingDeserializer: a poison (un-deserializable) message goes to the DLT instead of looping forever
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
+        spring.json.trusted.packages: com.example.resilience
+        spring.json.value.default.type: com.example.resilience.OrderResilienceService$OrderEvent
+        isolation.level: read_committed
+        max.poll.interval.ms: 300000
+        session.timeout.ms: 45000
+        heartbeat.interval.ms: 3000
+    listener:
+      ack-mode: record
+      missing-topics-fatal: false
+
+server:
+  port: 8080
+  shutdown: graceful                         # finish in-flight requests before stopping
+
+# ======================================================================
+# RESILIENCE4J
+# configs.default  = shared base settings
+# instances.<name> = per-dependency overrides (name matches the annotation)
+# ======================================================================
+resilience4j:
+
+  # -------------------------------------------------------------------
+  # 1. CIRCUIT BREAKER
+  # -------------------------------------------------------------------
+  circuitbreaker:
+    # circuitBreakerAspectOrder: <int>       # change aspect nesting order only if you really need to
+    configs:
+      default:
+        registerHealthIndicator: true            # show state in /actuator/health
+        allowHealthIndicatorToFail: false        # OPEN circuit does NOT mark the app DOWN (avoids cascading restarts)
+        slidingWindowType: COUNT_BASED           # COUNT_BASED (last N calls) | TIME_BASED (last N seconds)
+        slidingWindowSize: 20                    # N calls (or N seconds if TIME_BASED)
+        minimumNumberOfCalls: 10                 # don't evaluate failure rate until this many calls
+        failureRateThreshold: 50                 # % failed calls that opens the circuit
+        slowCallRateThreshold: 80                # % slow calls that opens the circuit
+        slowCallDurationThreshold: 2s            # a call slower than this counts as "slow"
+        waitDurationInOpenState: 15s             # stay OPEN this long before trying HALF_OPEN
+        automaticTransitionFromOpenToHalfOpenEnabled: true  # move to HALF_OPEN without waiting for a call
+        permittedNumberOfCallsInHalfOpenState: 5 # trial calls in HALF_OPEN
+        maxWaitDurationInHalfOpenState: 10s      # 0 = wait until all trial calls complete
+        # Exponential back-off of the OPEN wait when the circuit keeps re-opening:
+        enableExponentialBackoff: false
+        exponentialBackoffMultiplier: 2
+        exponentialMaxWaitDurationInOpenState: 2m
+        enableRandomizedWait: false
+        randomizedWaitFactor: 0.5
+        eventConsumerBufferSize: 50              # events kept for /actuator/circuitbreakerevents
+        writableStackTraceEnabled: false         # cheaper CallNotPermittedException
+        recordExceptions:                        # count as failures
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - org.springframework.web.client.ResourceAccessException
+          - org.springframework.web.client.HttpServerErrorException
+          - com.example.resilience.OrderResilienceService$ServiceUnavailableException
+        ignoreExceptions:                        # neither success nor failure (client's fault, not downstream's)
+          - org.springframework.web.client.HttpClientErrorException
+          - com.example.resilience.OrderResilienceService$BusinessValidationException
+        # recordFailurePredicate: com.example.resilience.RecordFailurePredicate      # Predicate<Throwable>
+        # ignoreExceptionPredicate: com.example.resilience.IgnoreExceptionPredicate  # Predicate<Throwable>
+    instances:
+      inventoryService:
+        baseConfig: default
+        slidingWindowSize: 50
+        failureRateThreshold: 40
+        waitDurationInOpenState: 20s
+      recommendationService:                     # non-critical: open fast, recover fast
+        baseConfig: default
+        slidingWindowType: TIME_BASED
+        slidingWindowSize: 30                    # last 30 seconds
+        minimumNumberOfCalls: 5
+        failureRateThreshold: 30
+        slowCallDurationThreshold: 800ms
+        waitDurationInOpenState: 10s
+      checkoutService:
+        baseConfig: default
+        failureRateThreshold: 60
+        slowCallDurationThreshold: 3s
+
+  # -------------------------------------------------------------------
+  # 2a. BULKHEAD (SEMAPHORE)
+  # -------------------------------------------------------------------
+  bulkhead:
+    configs:
+      default:
+        maxConcurrentCalls: 25                   # parallel calls allowed
+        maxWaitDuration: 0ms                     # how long a call waits for a permit (0 = fail fast)
+        fairCallHandlingStrategyEnabled: true    # FIFO permit handling
+        writableStackTraceEnabled: false
+        eventConsumerBufferSize: 50
+    instances:
+      paymentService:
+        baseConfig: default
+        maxConcurrentCalls: 10                   # protect payment gateway connection limit
+        maxWaitDuration: 100ms
+      checkoutService:
+        baseConfig: default
+        maxConcurrentCalls: 50
+
+  # -------------------------------------------------------------------
+  # 2b. BULKHEAD (THREAD POOL)
+  # -------------------------------------------------------------------
+  thread-pool-bulkhead:
+    configs:
+      default:
+        coreThreadPoolSize: 4
+        maxThreadPoolSize: 8                     # must be >= coreThreadPoolSize
+        queueCapacity: 20                        # waiting tasks before BulkheadFullException
+        keepAliveDuration: 20ms                  # idle time before extra threads (> core) die
+        writableStackTraceEnabled: false
+        eventConsumerBufferSize: 50
+        # contextPropagators:                    # copy MDC / security context to pool threads
+        #   - com.example.resilience.MdcContextPropagator
+    instances:
+      invoiceService:
+        baseConfig: default
+        coreThreadPoolSize: 2
+        maxThreadPoolSize: 4
+        queueCapacity: 10
+
+  # -------------------------------------------------------------------
+  # 3. RETRY
+  # -------------------------------------------------------------------
+  retry:
+    # retryAspectOrder: <int>
+    configs:
+      default:
+        maxAttempts: 3                           # TOTAL attempts, including the first call
+        waitDuration: 500ms                      # base wait between attempts
+        enableExponentialBackoff: true           # wait = waitDuration * multiplier^(attempt-1)
+        exponentialBackoffMultiplier: 2
+        exponentialMaxWaitDuration: 5s           # cap on a single wait
+        enableRandomizedWait: false              # jitter; set true (with randomizedWaitFactor) to avoid thundering herd
+        randomizedWaitFactor: 0.5                # +/- 50% jitter
+        failAfterMaxAttempts: false              # true = throw MaxRetriesExceededException when result predicate keeps failing
+        eventConsumerBufferSize: 50
+        retryExceptions:                         # retry ONLY transient errors
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+          - org.springframework.web.client.ResourceAccessException
+          - org.springframework.web.client.HttpServerErrorException
+          - com.example.resilience.OrderResilienceService$ServiceUnavailableException
+        ignoreExceptions:                        # never retry
+          - org.springframework.web.client.HttpClientErrorException
+          - com.example.resilience.OrderResilienceService$BusinessValidationException
+        # retryExceptionPredicate: com.example.resilience.RetryOnPredicate   # Predicate<Throwable>
+        # resultPredicate: com.example.resilience.RetryOnResultPredicate     # Predicate<Object>, retry on bad result
+    instances:
+      shippingService:
+        baseConfig: default
+        maxAttempts: 4                           # 1 + 3 retries: waits 1s, 2s, 4s
+        waitDuration: 1s
+        exponentialMaxWaitDuration: 8s
+      checkoutService:
+        baseConfig: default
+        maxAttempts: 2                           # low: checkout is user-facing, latency matters
+
+  # -------------------------------------------------------------------
+  # 4. TIMEOUT (TimeLimiter): only for CompletableFuture / reactive return types
+  # -------------------------------------------------------------------
+  timelimiter:
+    # timeLimiterAspectOrder: <int>
+    configs:
+      default:
+        timeoutDuration: 2s
+        cancelRunningFuture: true                # cancel the future on timeout
+        eventConsumerBufferSize: 50
+    instances:
+      pricingService:
+        baseConfig: default
+        timeoutDuration: 800ms                   # pricing must be snappy; stale price is acceptable
+      checkoutService:
+        baseConfig: default
+        timeoutDuration: 4s
+
+  # -------------------------------------------------------------------
+  # 6. RATE LIMITER
+  # -------------------------------------------------------------------
+  ratelimiter:
+    # rateLimiterAspectOrder: <int>
+    configs:
+      default:
+        registerHealthIndicator: true
+        allowHealthIndicatorToFail: false
+        limitForPeriod: 100                      # permits per refresh period
+        limitRefreshPeriod: 1s                   # permits reset every period (100 req/s)
+        timeoutDuration: 0ms                     # wait for a permit (0 = reject immediately)
+        subscribeForEvents: true
+        eventConsumerBufferSize: 100
+        writableStackTraceEnabled: false
+    instances:
+      notificationService:                       # SMS/email provider allows 10 msg/s
+        baseConfig: default
+        limitForPeriod: 10
+        limitRefreshPeriod: 1s
+        timeoutDuration: 250ms                   # brief wait smooths small bursts
+      checkoutService:
+        baseConfig: default
+        limitForPeriod: 200
+
+# Default nesting (no config needed):
+#   Retry( CircuitBreaker( RateLimiter( TimeLimiter( Bulkhead( method ) ) ) ) )
+
+# ======================================================================
+# APPLICATION SETTINGS (read with @Value in OrderResilienceService)
+# ======================================================================
+app:
+  http:
+    connect-timeout-ms: 1000                     # TCP connect timeout
+    read-timeout-ms: 3000                        # socket read timeout
+
+  downstream:
+    inventory-url: http://inventory-service:8080
+    payment-url: http://payment-service:8080
+    invoice-url: http://invoice-service:8080
+    shipping-url: http://shipping-service:8080
+    pricing-url: http://pricing-service:8080
+    recommendation-url: http://recommendation-service:8080
+    catalog-url: http://catalog-service:8080
+    notification-url: http://notification-service:8080
+    checkout-url: http://checkout-service:8080
+
+  # 7. Failover & Replication
+  order-cluster:
+    nodes: http://order-db-primary:8080,http://order-db-replica-1:8080,http://order-db-replica-2:8080  # priority order
+    max-attempts-per-node: 2                     # tries per node before failing over
+    quarantine-duration-ms: 30000                # skip a failed node for this long
+    replication:
+      write-quorum: 2                            # W acks needed out of N nodes (2 of 3 = majority)
+      timeout-ms: 2000                           # per-node write timeout
+      pool-size: 8                               # threads for parallel replica writes
+
+  # 5. Fallback
+  fallback:
+    cache-ttl-ms: 300000                         # cached data counts as "fresh" for 5 minutes
+    default-recommendations: BESTSELLER-1,BESTSELLER-2,BESTSELLER-3
+
+  # 6b. Per-tenant rate limit (programmatic)
+  rate-limit:
+    per-tenant:
+      limit-for-period: 20
+      refresh-period-ms: 1000
+      timeout-ms: 0
+
+  # 8. Self-healing
+  self-healing:
+    interval-ms: 30000                           # run every 30 s
+    initial-delay-ms: 15000                      # wait for startup first
+    probe-timeout-ms: 500                        # health probe connect/read timeout
+    probe-path: /actuator/health
+
+  # 9. Dead Letter Queue
+  kafka:
+    listener-concurrency: 3                      # consumer threads (<= partitions)
+    topics:
+      order-events: order-events                 # DLT becomes order-events-dlt
+      deferred-notifications: notifications-deferred
+      dead-letter: order-service-dlq             # manual DLQ for failed HTTP flows
+    dlq:
+      attempts: 4                                # 1 original + 3 retry topics
+      initial-delay-ms: 1000
+      multiplier: 2.0
+      max-delay-ms: 10000
+      partitions: 3
+      replication-factor: 1                      # use 3 in production
+      global-timeout-ms: 120000
+
+# ======================================================================
+# 8. HEALTH CHECKS (Actuator)
+# ======================================================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,circuitbreakers,circuitbreakerevents,retries,retryevents,ratelimiters,ratelimiterevents,bulkheads,bulkheadevents,timelimiters,timelimiterevents
+  endpoint:
+    health:
+      show-details: always                       # use 'when-authorized' in production
+      show-components: always
+      probes:
+        enabled: true                            # /actuator/health/liveness and /readiness
+      status:
+        order: DOWN, OUT_OF_SERVICE, DEGRADED, UNKNOWN, UP
+        http-mapping:
+          DOWN: 503
+          OUT_OF_SERVICE: 503
+          DEGRADED: 200                          # degraded still serves traffic
+      group:
+        liveness:
+          include: livenessState                 # app process alive? Keep this minimal: failure = restart
+        readiness:
+          include: readinessState,orderResilienceService   # failure = removed from load balancer, not restarted
+  health:
+    circuitbreakers:
+      enabled: true
+    ratelimiters:
+      enabled: true
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        resilience4j.circuitbreaker.calls: true
+        http.server.requests: true
+    tags:
+      application: ${spring.application.name}
+
+logging:
+  level:
+    io.github.resilience4j: INFO
+    com.example.resilience: INFO
