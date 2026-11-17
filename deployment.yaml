@@ -1,0 +1,109 @@
+# Infrastructure side of "Failover & Replication" and "Health Checks & Self-Healing".
+# Kubernetes restarts pods that fail liveness, stops routing to pods that fail readiness,
+# keeps N replicas running, and spreads them across nodes/zones.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-service
+  labels: { app: order-service }
+spec:
+  replicas: 3                               # replication: 3 identical instances
+  revisionHistoryLimit: 5
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0                     # never drop below 3 during deploys
+      maxSurge: 1
+  selector:
+    matchLabels: { app: order-service }
+  template:
+    metadata:
+      labels: { app: order-service }
+    spec:
+      terminationGracePeriodSeconds: 30     # > spring.lifecycle.timeout-per-shutdown-phase
+      restartPolicy: Always                 # self-healing: crashed container is restarted
+      topologySpreadConstraints:            # failover across zones
+        - maxSkew: 1
+          topologyKey: topology.kubernetes.io/zone
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels: { app: order-service }
+      affinity:
+        podAntiAffinity:                    # don't put all replicas on one node
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels: { app: order-service }
+      containers:
+        - name: order-service
+          image: registry.example.com/order-service:1.0.0
+          ports:
+            - containerPort: 8080
+          resources:
+            requests: { cpu: "500m", memory: "512Mi" }
+            limits:   { cpu: "1",    memory: "1Gi" }
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-XX:MaxRAMPercentage=75"
+          startupProbe:                     # gives slow JVM startup time before liveness kicks in
+            httpGet: { path: /actuator/health/liveness, port: 8080 }
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 24            # up to 10 + 24*5 = 130 s to start
+          livenessProbe:                    # fail -> container RESTART
+            httpGet: { path: /actuator/health/liveness, port: 8080 }
+            periodSeconds: 10
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3             # 30 s of failures before restart
+          readinessProbe:                   # fail -> removed from Service endpoints (no traffic)
+            httpGet: { path: /actuator/health/readiness, port: 8080 }
+            periodSeconds: 5
+            timeoutSeconds: 2
+            successThreshold: 1
+            failureThreshold: 3
+          lifecycle:
+            preStop:                        # let the load balancer drain before shutdown
+              exec: { command: ["sh", "-c", "sleep 10"] }
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: order-service-pdb
+spec:
+  minAvailable: 2                           # node drains/upgrades keep at least 2 pods
+  selector:
+    matchLabels: { app: order-service }
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: order-service-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: order-service
+  minReplicas: 3
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target: { type: Utilization, averageUtilization: 70 }
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300       # avoid flapping
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: order-service
+spec:
+  selector: { app: order-service }
+  ports:
+    - port: 80
+      targetPort: 8080
