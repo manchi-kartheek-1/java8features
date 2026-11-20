@@ -27,6 +27,7 @@ public class StringPrograms {
         StringPrograms.joinAllStringsIntoSingleCommaSeparatedString();
         StringPrograms.findLongestStringInList();
         StringPrograms.findShortestStringInList();
+        StringPrograms.findDistinctElements();
         StringPrograms.filterStringsHavingLengthExactly();
         StringPrograms.filterAllStringsAreNonEmpty();
         FunInterface obj = () -> {
@@ -36,6 +37,13 @@ public class StringPrograms {
         obj.test();
         FunInterface.test1();
         FunInterface.test2();
+    }
+
+    private static void findDistinctElements() {
+    String s = "programming";
+    Set<Character> set = new HashSet<>();
+        List<Character> list = s.chars().mapToObj(c -> (char) c).filter(c -> !set.add(c)).toList();
+        System.out.println("findDistinctElements "+list);
     }
 
     public static void countOccurrenceInString() {
