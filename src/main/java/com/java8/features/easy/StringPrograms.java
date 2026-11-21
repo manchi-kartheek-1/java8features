@@ -42,7 +42,10 @@ public class StringPrograms {
     private static void findDistinctElements() {
     String s = "programming";
     Set<Character> set = new HashSet<>();
-        List<Character> list = s.chars().mapToObj(c -> (char) c).filter(c -> !set.add(c)).toList();
+        List<Character> list = s.chars()
+                .mapToObj(c -> (char) c)
+                .filter(c -> !set.add(c))
+                .toList();
         System.out.println("findDistinctElements "+list);
     }
 
