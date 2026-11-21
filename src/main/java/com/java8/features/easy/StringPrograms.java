@@ -99,7 +99,7 @@ public class StringPrograms {
                 .entrySet()
                 .stream()
                 .filter(entry -> entry.getValue() == 1)
-                .map(entry -> entry.getKey())
+                .map(Map.Entry::getKey)
                 .findFirst()
                 .orElse(null);
         System.out.println("Non Repeating Character "+c1);
@@ -132,7 +132,7 @@ public class StringPrograms {
 
     public static void FindFirstStringThatStartsWith() {
         String string = "principle + charges = installment amount or else report and don't add customer installments";
-        String s = Arrays.stream(string.split(" ")).filter(word -> word.startsWith("i")).findFirst().get();
+        String s = Arrays.stream(string.split(" ")).filter(word -> word.startsWith("i")).findFirst().orElse(null);
         System.out.println(s);
     }
 
@@ -167,7 +167,7 @@ public class StringPrograms {
 
     public static void filterAllStringsAreNonEmpty() {
         List<String> list = List.of("principle", "charges", "installment", "", " ", "else", "report", "and", "don't", "add", "customer");
-        List<String> collect = list.stream().filter(f -> !f.isEmpty() && !f.isBlank()).collect(Collectors.toList());
+        List<String> collect = list.stream().filter(f -> !f.isBlank()).collect(Collectors.toList());
         System.out.println(collect);
     }
 
